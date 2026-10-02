@@ -21,8 +21,11 @@
 </head>
 <body class="bg-[#090a0f] text-slate-200 font-['Inter'] min-h-screen relative overflow-x-hidden selection:bg-purple-600 selection:text-white">
 
+  <!-- Reading Progress Bar -->
+  <div id="reading-progress-bar"></div>
+
   <!-- CRT Scanline Effect -->
-  <div class="crt-scanline fixed inset-0 pointer-events-none z-50 opacity-20"></div>
+  <div class="crt-scanline fixed inset-0 pointer-events-none z-40 opacity-20"></div>
 
   <!-- Background Ambient Glow -->
   <div class="fixed -top-40 -left-40 w-96 h-96 bg-purple-900/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -51,11 +54,11 @@
       <nav class="flex items-center gap-2 bg-[#121420] p-1.5 rounded-2xl border border-slate-800/80 shadow-inner">
         <button id="tab-btn-catalog" onclick="switchTab('catalog')" class="nav-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all">
           <i data-lucide="layout-grid" class="w-4 h-4"></i>
-          <span>Beranda & Katalog Karya</span>
+          <span>Katalog Karya</span>
         </button>
         <button id="tab-btn-upload" onclick="switchTab('upload')" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>+ Upload ARG Kamu</span>
+          <span id="nav-upload-label">+ Tulis / Upload ARG</span>
         </button>
       </nav>
     </header>
@@ -74,19 +77,46 @@
             Kumpulan Cerita ARG & <span class="bg-gradient-to-r from-purple-400 via-emerald-400 to-amber-300 bg-clip-text text-transparent">Bedah 4 Pilar Psikologi.</span>
           </h2>
           <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-            Klik pada salah satu cerita atau analisis ARG di bawah untuk membacanya secara langsung. Kamu juga bisa mengunggah ARG buatanmu sendiri!
+            Klik cerita atau analisis di bawah untuk mulai membaca. Kamu juga bisa menulis karya sendiri, mengedit, serta backup/export naskah ke file JSON!
           </p>
         </div>
       </div>
 
-      <!-- Catalog Grid -->
+      <!-- Controls & Filter Toolbar -->
       <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i data-lucide="book-open" class="w-5 h-5 text-emerald-400"></i>
-            <span>Daftar ARG & Novel Terdaftar</span>
-          </h3>
-          <span class="text-xs text-slate-500 font-mono" id="catalog-count-badge">5 Karya Tersedia</span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <!-- Filter Category Pills -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            <button onclick="setCategoryFilter('all')" id="filter-pill-all" class="filter-pill active px-3.5 py-1.5 rounded-xl border border-slate-800 bg-[#111320] text-slate-300 font-bold shrink-0">
+              Semua
+            </button>
+            <button onclick="setCategoryFilter('novel')" id="filter-pill-novel" class="filter-pill px-3.5 py-1.5 rounded-xl border border-slate-800 bg-[#111320] text-slate-300 font-bold shrink-0">
+              📖 Novel Utama
+            </button>
+            <button onclick="setCategoryFilter('analysis')" id="filter-pill-analysis" class="filter-pill px-3.5 py-1.5 rounded-xl border border-slate-800 bg-[#111320] text-slate-300 font-bold shrink-0">
+              🧠 Bedah ARG (Original)
+            </button>
+            <button onclick="setCategoryFilter('user')" id="filter-pill-user" class="filter-pill px-3.5 py-1.5 rounded-xl border border-slate-800 bg-[#111320] text-slate-300 font-bold shrink-0">
+              👤 Karya Saya
+            </button>
+          </div>
+
+          <!-- Data Management Buttons (Export / Import) -->
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="exportVaultData()" title="Backup semua karya ARG buatanmu ke file JSON" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>Export JSON</span>
+            </button>
+            <button onclick="triggerImportFile()" title="Pulihkan karya ARG dari file JSON cadangan" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
+              <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Import JSON</span>
+            </button>
+            <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="handleImportFile(event)">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+          <span id="catalog-count-badge">5 Karya Tersedia</span>
         </div>
 
         <!-- Dynamic Grid Container -->
@@ -102,21 +132,34 @@
 
       <!-- Reader Controls Header -->
       <div class="p-4 rounded-2xl bg-[#111320] border border-slate-800 flex flex-wrap items-center justify-between gap-4 shadow-lg">
-        <button onclick="switchTab('catalog')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          <span>Kembali ke Beranda</span>
-        </button>
+        <div class="flex items-center gap-3">
+          <button onclick="switchTab('catalog')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Kembali</span>
+          </button>
+          <span id="reader-reading-time" class="px-2.5 py-1 rounded-lg bg-black/60 text-purple-300 text-xs font-mono border border-purple-800/40 flex items-center gap-1.5">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span>~3 menit baca</span>
+          </span>
+        </div>
 
-        <!-- Typography Controls -->
-        <div class="flex items-center gap-2 bg-[#090a0f] p-1.5 rounded-xl border border-slate-800 text-xs">
-          <span class="text-slate-400 px-1 font-mono">Font:</span>
-          <button onclick="changeReaderFont('font-serif')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-serif">Serif</button>
-          <button onclick="changeReaderFont('font-sans')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-sans">Sans</button>
-          <button onclick="changeReaderFont('font-mono')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono">Mono</button>
-          <span class="text-slate-600">|</span>
-          <button onclick="changeReaderSize('text-sm')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A-</button>
-          <button onclick="changeReaderSize('text-base')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A</button>
-          <button onclick="changeReaderSize('text-lg')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A+</button>
+        <!-- Right Side: Download & Typography Controls -->
+        <div class="flex items-center gap-3">
+          <button onclick="downloadCurrentStory()" title="Download naskah yang sedang dibaca sebagai file TXT" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Unduh Naskah</span>
+          </button>
+
+          <div class="flex items-center gap-2 bg-[#090a0f] p-1.5 rounded-xl border border-slate-800 text-xs">
+            <span class="text-slate-400 px-1 font-mono">Font:</span>
+            <button onclick="changeReaderFont('font-serif')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-serif">Serif</button>
+            <button onclick="changeReaderFont('font-sans')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-sans">Sans</button>
+            <button onclick="changeReaderFont('font-mono')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono">Mono</button>
+            <span class="text-slate-600">|</span>
+            <button onclick="changeReaderSize('text-sm')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A-</button>
+            <button onclick="changeReaderSize('text-base')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A</button>
+            <button onclick="changeReaderSize('text-lg')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A+</button>
+          </div>
         </div>
       </div>
 
@@ -134,18 +177,26 @@
 
     </main>
 
-    <!-- TAB 3: UPLOAD / TAMBAH ARG KAMU -->
+    <!-- TAB 3: UPLOAD / EDIT ARG KAMU -->
     <main id="view-upload" class="view-panel hidden space-y-6">
 
-      <div class="pb-3 border-b border-slate-800">
-        <span class="text-xs font-mono text-purple-400">PUBLIKASI KARYA KREATIF // ADD YOUR ARG STORY</span>
-        <h2 class="text-2xl font-extrabold text-white">Upload Cerita / Analisis ARG Kamu</h2>
-        <p class="text-xs text-slate-400 mt-1">Buat cerita novel ARG baru atau tambahkan hasil analisis ARG Minecraft buatanmu agar bisa dibaca di katalog!</p>
+      <div class="pb-3 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono text-purple-400">PUBLIKASI KARYA KREATIF // CREATE & EDIT ARG STORY</span>
+          <h2 id="form-heading" class="text-2xl font-extrabold text-white">Upload Cerita / Analisis ARG Kamu</h2>
+          <p class="text-xs text-slate-400 mt-1">Tulis cerita novel ARG baru atau hasil analisis Minecraft buatanmu. Data tersimpan otomatis dan bisa kamu edit kapan saja!</p>
+        </div>
+        <button id="cancel-edit-btn" onclick="cancelEditMode()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold hidden flex items-center gap-1.5">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>Batal Edit</span>
+        </button>
       </div>
 
       <!-- Upload Form Box -->
       <div class="p-6 md:p-8 rounded-3xl bg-[#111320] border border-purple-900/40 shadow-xl space-y-6">
         <form id="upload-arg-form" onsubmit="handleUploadARG(event)" class="space-y-5 text-xs">
+          <input type="hidden" id="upload-mode" value="create">
+          <input type="hidden" id="upload-id" value="">
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -170,10 +221,10 @@
             <div>
               <label class="block text-slate-200 font-bold mb-1.5">Pilar Psikologi Utama</label>
               <select id="upload-pillar" class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600">
-                <option value="Keluarga (Pengorbanan Ingatan)">👨‍👩‍👧 Pilar 1: Keluarga (Pengorbanan Ingatan)</option>
-                <option value="Sahabat (Jejak Terbengkalai)">🤝 Pilar 2: Sahabat (Jejak Terbengkalai)</option>
-                <option value="Pendamping (Penyelamat di Batas Akhir)">❤️ Pilar 3: Pendamping (Penyelamat)</option>
-                <option value="Diri Sendiri (Konfrontasi Paranoia)">👤 Pilar 4: Diri Sendiri (Konfrontasi Paranoia)</option>
+                <option value="Pilar 1: Keluarga (Pengorbanan Ingatan)">👨‍👩‍👧 Pilar 1: Keluarga (Pengorbanan Ingatan)</option>
+                <option value="Pilar 2: Sahabat (Jejak Terbengkalai)">🤝 Pilar 2: Sahabat (Jejak Terbengkalai)</option>
+                <option value="Pilar 3: Pendamping (Penyelamat di Batas Akhir)">❤️ Pilar 3: Pendamping (Penyelamat)</option>
+                <option value="Pilar 4: Diri Sendiri (Konfrontasi Paranoia)">👤 Pilar 4: Diri Sendiri (Konfrontasi Paranoia)</option>
               </select>
             </div>
           </div>
@@ -190,9 +241,9 @@
 
           <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
             <button type="button" onclick="switchTab('catalog')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">Batal</button>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-bold shadow-lg shadow-purple-900/40 flex items-center gap-2">
+            <button type="submit" id="submit-upload-btn" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-bold shadow-lg shadow-purple-900/40 flex items-center gap-2">
               <i data-lucide="upload" class="w-4 h-4"></i>
-              <span>Publikasikan ARG</span>
+              <span id="submit-btn-text">Publikasikan ARG</span>
             </button>
           </div>
 
@@ -207,6 +258,29 @@
       <p class="text-[11px] text-slate-600">Ruang baca cerita misteri ARG & platform eksplorasi naskah buatan sendiri.</p>
     </footer>
 
+  </div>
+
+  <!-- FLOATING BGM / AMBIENCE AUDIO PLAYER (Web Audio API Synthesizer) -->
+  <div class="fixed bottom-5 right-5 z-50">
+    <div id="ambience-widget" class="flex items-center gap-2 bg-[#10121d]/90 backdrop-blur-md border border-purple-800/50 p-2 rounded-2xl shadow-2xl">
+      <!-- Play / Pause Button -->
+      <button id="ambience-play-btn" onclick="toggleAmbience()" title="Putar audio suasana misteri" class="w-9 h-9 rounded-xl bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition-all shadow-md">
+        <i id="ambience-icon" data-lucide="play" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Mode Selector -->
+      <select id="ambience-mode" onchange="changeAmbienceMode()" class="bg-[#181a29] border border-slate-700 text-[11px] text-slate-200 rounded-lg px-2 py-1.5 outline-none font-mono">
+        <option value="radio">📻 Derau Disc 11</option>
+        <option value="rain">🌧️ Hujan Malam</option>
+        <option value="void">🌌 Void Drone</option>
+      </select>
+
+      <!-- Volume Slider -->
+      <div class="flex items-center gap-1 px-1">
+        <i data-lucide="volume-2" class="w-3.5 h-3.5 text-slate-400"></i>
+        <input type="range" id="ambience-vol" min="0" max="1" step="0.05" value="0.3" oninput="setAmbienceVolume(this.value)" class="w-16 accent-purple-500 cursor-pointer">
+      </div>
+    </div>
   </div>
 
   <!-- Custom JS Application Logic -->
