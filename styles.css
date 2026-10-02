@@ -1,0 +1,73 @@
+/* Custom Styles for Minecraft ARG Vault & Novel Hub */
+
+/* CRT Scanline Overlay Animation */
+.crt-scanline {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.06),
+    rgba(0, 255, 0, 0.02),
+    rgba(0, 0, 255, 0.06)
+  );
+  background-size: 100% 4px, 6px 100%;
+}
+
+/* Nav Tab Active Styles */
+.nav-tab {
+  color: #94a3b8;
+  background-color: transparent;
+}
+.nav-tab:hover {
+  color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.nav-tab.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+/* Novel Reader Custom Font Classes */
+.font-serif {
+  font-family: 'Lora', Georgia, serif;
+}
+.font-sans {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Smooth fade in transition for tab switching */
+.view-panel {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

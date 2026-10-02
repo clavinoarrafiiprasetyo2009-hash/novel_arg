@@ -1,0 +1,14 @@
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary & Log files
+*.log
+*.tmp
+parse_chatgpt.js
+extracted_texts.txt
+
+# Editor directories
+.vscode/
+.idea/

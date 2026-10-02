@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft ARG Vault & Story Hub 👾📖</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#090a0f] text-slate-200 font-['Inter'] min-h-screen relative overflow-x-hidden selection:bg-purple-600 selection:text-white">
+
+  <!-- CRT Scanline Effect -->
+  <div class="crt-scanline fixed inset-0 pointer-events-none z-50 opacity-20"></div>
+
+  <!-- Background Ambient Glow -->
+  <div class="fixed -top-40 -left-40 w-96 h-96 bg-purple-900/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed top-1/2 -right-40 w-96 h-96 bg-emerald-900/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Main App Shell -->
+  <div class="max-w-5xl mx-auto px-4 py-8 relative z-10 space-y-8">
+
+    <!-- Top Navigation Bar -->
+    <header class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('catalog')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-emerald-600 p-0.5 shadow-lg shadow-purple-900/30">
+          <div class="w-full h-full bg-[#0d0e17] rounded-[10px] flex items-center justify-center">
+            <span class="text-lg">👾</span>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-emerald-400 to-amber-300 bg-clip-text text-transparent font-['JetBrains_Mono']">
+            ARG_VOID_VAULT
+          </h1>
+          <p class="text-xs text-slate-400">Minecraft ARG Stories & Psychological Mystery Hub</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-2 bg-[#121420] p-1.5 rounded-2xl border border-slate-800/80 shadow-inner">
+        <button id="tab-btn-catalog" onclick="switchTab('catalog')" class="nav-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>Beranda & Katalog Karya</span>
+        </button>
+        <button id="tab-btn-upload" onclick="switchTab('upload')" class="nav-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ Upload ARG Kamu</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- TAB 1: BERANDA & KATALOG KARYA (HOME) -->
+    <main id="view-catalog" class="view-panel space-y-8">
+
+      <!-- Hero Banner -->
+      <div class="relative rounded-3xl p-6 md:p-8 overflow-hidden border border-purple-900/40 bg-gradient-to-br from-[#131525] via-[#0e101b] to-[#090a0f] shadow-2xl">
+        <div class="max-w-2xl space-y-3 relative z-10">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-700/50 text-purple-300 text-xs font-mono">
+            <i data-lucide="radio" class="w-3.5 h-3.5 text-purple-400 animate-pulse"></i>
+            <span>ARSIP MISTERI ARG MINECRAFT & NOVEL</span>
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight">
+            Kumpulan Cerita ARG & <span class="bg-gradient-to-r from-purple-400 via-emerald-400 to-amber-300 bg-clip-text text-transparent">Bedah 4 Pilar Psikologi.</span>
+          </h2>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            Klik pada salah satu cerita atau analisis ARG di bawah untuk membacanya secara langsung. Kamu juga bisa mengunggah ARG buatanmu sendiri!
+          </p>
+        </div>
+      </div>
+
+      <!-- Catalog Grid -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="book-open" class="w-5 h-5 text-emerald-400"></i>
+            <span>Daftar ARG & Novel Terdaftar</span>
+          </h3>
+          <span class="text-xs text-slate-500 font-mono" id="catalog-count-badge">5 Karya Tersedia</span>
+        </div>
+
+        <!-- Dynamic Grid Container -->
+        <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Rendered via app.js -->
+        </div>
+      </div>
+
+    </main>
+
+    <!-- TAB 2: READER VIEW (TAMPILAN BACA CERITA/ARG) -->
+    <main id="view-reader" class="view-panel hidden space-y-6">
+
+      <!-- Reader Controls Header -->
+      <div class="p-4 rounded-2xl bg-[#111320] border border-slate-800 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+        <button onclick="switchTab('catalog')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Kembali ke Beranda</span>
+        </button>
+
+        <!-- Typography Controls -->
+        <div class="flex items-center gap-2 bg-[#090a0f] p-1.5 rounded-xl border border-slate-800 text-xs">
+          <span class="text-slate-400 px-1 font-mono">Font:</span>
+          <button onclick="changeReaderFont('font-serif')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-serif">Serif</button>
+          <button onclick="changeReaderFont('font-sans')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-sans">Sans</button>
+          <button onclick="changeReaderFont('font-mono')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono">Mono</button>
+          <span class="text-slate-600">|</span>
+          <button onclick="changeReaderSize('text-sm')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A-</button>
+          <button onclick="changeReaderSize('text-base')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A</button>
+          <button onclick="changeReaderSize('text-lg')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">A+</button>
+        </div>
+      </div>
+
+      <!-- Novel Chapter Tabs (Visible only if story has multiple chapters) -->
+      <div id="reader-chapter-tabs" class="flex items-center gap-2 overflow-x-auto pb-2 hidden">
+        <!-- Chapter buttons inserted dynamically -->
+      </div>
+
+      <!-- Main Text Reader Paper -->
+      <article class="p-6 md:p-10 rounded-3xl bg-[#0e101a] border border-slate-800/90 shadow-2xl relative min-h-[500px]">
+        <div id="reader-body" class="reader-text-body font-['Lora'] text-slate-200 text-base leading-relaxed space-y-6 max-w-2xl mx-auto">
+          <!-- Story content rendered dynamically -->
+        </div>
+      </article>
+
+    </main>
+
+    <!-- TAB 3: UPLOAD / TAMBAH ARG KAMU -->
+    <main id="view-upload" class="view-panel hidden space-y-6">
+
+      <div class="pb-3 border-b border-slate-800">
+        <span class="text-xs font-mono text-purple-400">PUBLIKASI KARYA KREATIF // ADD YOUR ARG STORY</span>
+        <h2 class="text-2xl font-extrabold text-white">Upload Cerita / Analisis ARG Kamu</h2>
+        <p class="text-xs text-slate-400 mt-1">Buat cerita novel ARG baru atau tambahkan hasil analisis ARG Minecraft buatanmu agar bisa dibaca di katalog!</p>
+      </div>
+
+      <!-- Upload Form Box -->
+      <div class="p-6 md:p-8 rounded-3xl bg-[#111320] border border-purple-900/40 shadow-xl space-y-6">
+        <form id="upload-arg-form" onsubmit="handleUploadARG(event)" class="space-y-5 text-xs">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-200 font-bold mb-1.5">Judul ARG / Karya *</label>
+              <input type="text" id="upload-title" required placeholder="Contoh: Teror Sinyal Disc 11 / Anomali Server 2012" class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600">
+            </div>
+            <div>
+              <label class="block text-slate-200 font-bold mb-1.5">Nama Penulis / Kreator</label>
+              <input type="text" id="upload-author" placeholder="Contoh: Kamu / RetroCraft" class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-200 font-bold mb-1.5">Kategori Karya</label>
+              <select id="upload-category" class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600">
+                <option value="Novel Misteri ARG">📖 Novel Misteri ARG</option>
+                <option value="Bedah Analisis ARG">🧠 Bedah Analisis ARG</option>
+                <option value="Teori Lore Minecraft">🔮 Teori Lore Minecraft</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-200 font-bold mb-1.5">Pilar Psikologi Utama</label>
+              <select id="upload-pillar" class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600">
+                <option value="Keluarga (Pengorbanan Ingatan)">👨‍👩‍👧 Pilar 1: Keluarga (Pengorbanan Ingatan)</option>
+                <option value="Sahabat (Jejak Terbengkalai)">🤝 Pilar 2: Sahabat (Jejak Terbengkalai)</option>
+                <option value="Pendamping (Penyelamat di Batas Akhir)">❤️ Pilar 3: Pendamping (Penyelamat)</option>
+                <option value="Diri Sendiri (Konfrontasi Paranoia)">👤 Pilar 4: Diri Sendiri (Konfrontasi Paranoia)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-200 font-bold mb-1.5">Ringkasan / Sinopsis Singkat *</label>
+            <textarea id="upload-summary" required rows="2" placeholder="Tuliskan 2-3 kalimat gambaran cerita ARG kamu di sini..." class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-slate-200 font-bold mb-1.5">Isi Cerita / Naskah Lengkap *</label>
+            <textarea id="upload-content" required rows="8" placeholder="Tuliskan naskah lengkap cerita ARG atau hasil analisis kamu di sini..." class="w-full px-4 py-2.5 rounded-xl bg-[#161929] border border-slate-800 text-slate-200 outline-none focus:border-purple-600 font-mono leading-relaxed"></textarea>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <button type="button" onclick="switchTab('catalog')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">Batal</button>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-bold shadow-lg shadow-purple-900/40 flex items-center gap-2">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span>Publikasikan ARG</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="pt-8 border-t border-slate-800/80 text-center space-y-2 text-xs text-slate-500 font-mono">
+      <p>ARG_VOID_VAULT // Minecraft ARG Story & Novel Archive</p>
+      <p class="text-[11px] text-slate-600">Ruang baca cerita misteri ARG & platform eksplorasi naskah buatan sendiri.</p>
+    </footer>
+
+  </div>
+
+  <!-- Custom JS Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
