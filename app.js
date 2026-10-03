@@ -259,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) lucide.createIcons();
   renderCatalogGrid();
   setupScrollProgress();
+  renderLastReadCard();
 });
 
 // Storage Helpers
@@ -435,8 +436,88 @@ function updateReadingTime(htmlContent) {
   }
 }
 
+// ==========================================
+// LAST READ HISTORY LOGIC
+// ==========================================
+function saveLastRead(entry, chapterNum = 1) {
+  if (!entry) return;
+  let chapterTitle = null;
+  if (entry.isMultiChapter && entry.chapters && entry.chapters[chapterNum]) {
+    chapterTitle = entry.chapters[chapterNum].title;
+  }
+
+  const historyData = {
+    id: entry.id,
+    title: entry.title,
+    category: entry.category || 'Misteri ARG',
+    isMultiChapter: !!entry.isMultiChapter,
+    chapterNum: chapterNum,
+    chapterTitle: chapterTitle,
+    timestamp: Date.now()
+  };
+
+  localStorage.setItem('arg_last_read', JSON.stringify(historyData));
+  renderLastReadCard();
+}
+
+function renderLastReadCard() {
+  const card = document.getElementById('last-read-card');
+  if (!card) return;
+
+  const raw = localStorage.getItem('arg_last_read');
+  if (!raw) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  try {
+    const data = JSON.parse(raw);
+    const titleEl = document.getElementById('last-read-title');
+    const subEl = document.getElementById('last-read-sub');
+    const timeEl = document.getElementById('last-read-time');
+
+    if (titleEl) titleEl.textContent = data.title;
+    if (subEl) {
+      if (data.chapterTitle) {
+        subEl.textContent = `📍 Terakhir di: ${data.chapterTitle}`;
+      } else {
+        subEl.textContent = `📍 Kategori: ${data.category}`;
+      }
+    }
+    if (timeEl) {
+      timeEl.textContent = formatTimeAgo(data.timestamp);
+    }
+
+    card.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+  } catch (e) {
+    card.classList.add('hidden');
+  }
+}
+
+function formatTimeAgo(timestamp) {
+  if (!timestamp) return '';
+  const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+  if (diffSec < 60) return 'Baru saja';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} menit lalu`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} jam lalu`;
+  const diffDay = Math.floor(diffHour / 24);
+  return `${diffDay} hari lalu`;
+}
+
+function continueLastRead() {
+  const raw = localStorage.getItem('arg_last_read');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    openReader(data.id, data.chapterNum || 1);
+  } catch (e) {}
+}
+
 // Open Reader Engine
-function openReader(id) {
+function openReader(id, startChapter = 1) {
   const entries = getAllEntries();
   const entry = entries.find(e => e.id === id);
   if (!entry) return;
@@ -451,13 +532,13 @@ function openReader(id) {
     chapTabsContainer.classList.remove('hidden');
     chapTabsContainer.innerHTML = Object.keys(entry.chapters).map(chapNum => {
       return `
-        <button id="reader-chap-btn-${chapNum}" onclick="loadReaderChapter(${chapNum})" class="chap-tab ${chapNum == 1 ? 'active bg-purple-600 text-white' : 'bg-[#111320] text-slate-400'} px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0">
+        <button id="reader-chap-btn-${chapNum}" onclick="loadReaderChapter(${chapNum})" class="chap-tab ${chapNum == startChapter ? 'active bg-purple-600 text-white' : 'bg-[#111320] text-slate-400'} px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0">
           ${entry.chapters[chapNum].title}
         </button>
       `;
     }).join('');
 
-    loadReaderChapter(1);
+    loadReaderChapter(startChapter);
   } else {
     chapTabsContainer.classList.add('hidden');
     readerBody.innerHTML = `
@@ -471,6 +552,7 @@ function openReader(id) {
       </div>
     `;
     updateReadingTime(entry.content);
+    saveLastRead(entry, 1);
   }
 
   switchTab('reader');
@@ -490,6 +572,7 @@ function loadReaderChapter(chapNum) {
       </div>
     `;
     updateReadingTime(chap.content);
+    saveLastRead(currentReaderEntry, chapNum);
   }
 
   document.querySelectorAll('.chap-tab').forEach(btn => {

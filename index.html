@@ -82,6 +82,27 @@
         </div>
       </div>
 
+      <!-- Last Read History Card -->
+      <div id="last-read-card" class="hidden p-5 rounded-2xl bg-gradient-to-r from-purple-950/60 via-[#141624] to-[#10121d] border border-purple-800/50 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-purple-900/50 border border-purple-700/60 flex items-center justify-center text-purple-300 shrink-0">
+            <i data-lucide="bookmark-check" class="w-5 h-5 text-purple-400"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400">Terakhir Dibaca</span>
+              <span id="last-read-time" class="text-[10px] text-slate-500 font-mono"></span>
+            </div>
+            <h4 id="last-read-title" class="text-sm font-extrabold text-white"></h4>
+            <p id="last-read-sub" class="text-xs text-slate-400 font-mono"></p>
+          </div>
+        </div>
+        <button id="last-read-btn" onclick="continueLastRead()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md shadow-purple-900/40 flex items-center gap-1.5 shrink-0">
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+          <span>Lanjut Baca</span>
+        </button>
+      </div>
+
       <!-- Controls & Filter Toolbar -->
       <div class="space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
